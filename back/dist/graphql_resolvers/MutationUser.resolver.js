@@ -23,13 +23,9 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.userRoutes = void 0;
-const express_1 = require("express");
-exports.userRoutes = (0, express_1.Router)();
-// import { CustomRequest } from '../middleware/auth';
 const userService = __importStar(require("../services/userService"));
-exports.userRoutes.post('/login', userService.login);
-/**
- * Route for creationg merchant
- */
-exports.userRoutes.post('/register', userService.register);
+exports.default = {
+    // Auth
+    signupUser: userService.register,
+    loginUser: userService.login,
+};

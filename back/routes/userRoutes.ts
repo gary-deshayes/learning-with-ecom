@@ -4,9 +4,7 @@ import { Request, Response } from 'express';
 // import { CustomRequest } from '../middleware/auth';
 import * as userService from '../services/userService';
 
-userRoutes.post('/login', (req: Request, res: Response) => {
-
-});
+userRoutes.post('/login', userService.login);
 
 /**
  * Route for creationg merchant
