@@ -10,6 +10,8 @@ Avoir une application montée de A à Z avec les technos récentes
 
 **Front** : `Nuxt avec Vue 3`
 
+**Store** : `Pinia`
+
 **Back** : `Node (Ideal avec Typescript voir NestJs)`
 
 **Test unitaire** : `Oui avoir une approche TDD si possible`

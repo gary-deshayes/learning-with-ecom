@@ -2,5 +2,21 @@
 export default defineNuxtConfig({
   modules: [
     '@nuxtjs/tailwindcss',
-  ]
+    '@nuxtjs/apollo',
+    ['@pinia/nuxt', {
+      autoImports: [
+        // automatically imports `defineStore`
+        'defineStore', // import { defineStore } from 'pinia'
+        // automatically imports `defineStore` as `definePiniaStore`
+        ['defineStore', 'definePiniaStore'], // import { defineStore as definePiniaStore } from 'pinia'
+      ],
+    },]
+  ],
+  apollo: {
+    clients: {
+      default: {
+        httpEndpoint: 'http://localhost:8000/graphql'
+      }
+    },
+  },
 })
