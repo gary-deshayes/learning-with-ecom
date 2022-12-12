@@ -26,7 +26,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const userService = __importStar(require("../../services/userService"));
 const UserResolver = {
     Mutation: {
-        signupUser: userService.register,
+        signupUser: userService.registerGraphQL,
         loginUser: userService.loginGraph,
     },
 };

@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.loginGraph = exports.login = exports.register = exports.SECRET_KEY = void 0;
+exports.loginGraph = exports.login = exports.registerGraphQL = exports.register = exports.SECRET_KEY = void 0;
 /**
  * Service who contains all fonction for creating and manage merchant
  */
@@ -30,7 +30,7 @@ exports.SECRET_KEY = 'your-secret-key-here';
 function register(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         //Check if passwords are equal
-        if (req.body.password != req.body.confirmpassword) {
+        if (req.body.password != req.body.passwordConfirm) {
             res.status(500).send('Password not equal to confirm password');
         }
         else {
@@ -39,8 +39,13 @@ function register(req, res) {
             yield Merchant_1.Merchant.create({
                 email: req.body.email,
                 password: req.body.password
-            }).then(() => {
-                res.status(201).send("Registered");
+            }).then((data) => {
+                var _a;
+                console.log(data);
+                const token = jsonwebtoken_1.default.sign({ _id: (_a = data._id) === null || _a === void 0 ? void 0 : _a.toString(), name: data.name }, exports.SECRET_KEY, {
+                    expiresIn: '2 days',
+                });
+                res.status(201).send({ user: { _id: data._id, email: data.email }, token: token });
             })
                 .catch(error => {
                 let msg = "Error";
@@ -50,12 +55,62 @@ function register(req, res) {
                 // Will error, but will *not* be a mongoose validation error, it will be
                 // a duplicate key error.
                 // See: https://masteringjs.io/tutorials/mongoose/e11000-duplicate-key
-                res.send((0, errors_util_1.getErrorMessage)(error));
+                res.send({
+                    error: (0, errors_util_1.getErrorMessage)(error),
+                    error_message: msg
+                });
             });
         }
     });
 }
 exports.register = register;
+function registerGraphQL(parent, args, { req: Request, res: Response }) {
+    return __awaiter(this, void 0, void 0, function* () {
+        console.log('test');
+        //Check if passwords are equal
+        if (args.input.password != args.input.passwordConfirm) {
+            console.log(args);
+            return 'Password not equal to confirm password';
+        }
+        else {
+            //Check unique email and create
+            yield Merchant_1.Merchant.init();
+            yield Merchant_1.Merchant.create({
+                email: args.input.email,
+                password: args.input.password
+            }).then((data) => {
+                console.log({
+                    status: 'success',
+                    user: {
+                        id: data._id.toString(),
+                        email: data.email
+                    }
+                });
+                return {
+                    status: 'success',
+                    user: {
+                        id: data._id.toString(),
+                        email: data.email
+                    }
+                };
+            })
+                .catch(error => {
+                let msg = "Error";
+                if (error.code == 11000) {
+                    msg = "Account already exist in database with this email";
+                }
+                // Will error, but will *not* be a mongoose validation error, it will be
+                // a duplicate key error.
+                // See: https://masteringjs.io/tutorials/mongoose/e11000-duplicate-key
+                return {
+                    message: (0, errors_util_1.getErrorMessage)(error)
+                };
+            });
+            console.log("pase ici ?");
+        }
+    });
+}
+exports.registerGraphQL = registerGraphQL;
 function login(req, res) {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {

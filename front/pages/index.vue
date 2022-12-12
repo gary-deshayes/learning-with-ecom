@@ -182,11 +182,10 @@
 <script>
 import { useIndex } from '~/stores/index'
 const store = useIndex()
-console.log(store.isLogged());
 export default {
     
     onMounted() {
-        console.log(this.isLogged())
+        console.log('test')
     }
 }
 </script>

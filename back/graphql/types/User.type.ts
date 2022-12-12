@@ -39,8 +39,6 @@ const userSchema = `
   type UserData {
     id: ID!
     email: String!
-    createdAt: DateTime
-    updatedAt: DateTime
   }
 `;
 

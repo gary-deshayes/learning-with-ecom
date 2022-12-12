@@ -12,6 +12,11 @@ export default defineNuxtConfig({
       ],
     },]
   ],
+  runtimeConfig: {
+    public : {
+      URL_BACK: process.env.URL_BACK
+    }
+  },
   apollo: {
     clients: {
       default: {

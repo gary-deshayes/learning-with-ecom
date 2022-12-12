@@ -7,46 +7,83 @@
           <h1 class="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
             Création d'un compte
           </h1>
-            <div>
-              <label for="email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Email</label>
-              <input type="email" name="email" id="email" class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="email@name.fr" required="">
-            </div>
-            <div>
-              <label for="password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Mot de passe</label>
-              <input type="password" name="password" id="password" placeholder="••••••••" class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required="">
-            </div>
-            <div>
-              <label for="confirm-password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Confirmez votre mot de passe</label>
-              <input type="confirm-password" name="confirm-password" id="confirm-password" placeholder="••••••••" class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required="">
-            </div>
-            <button class="w-full text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800" @click="submit()">Envoyer</button>
-            <p class="text-sm font-light text-gray-500 dark:text-gray-400">
-              Déjà un compte ? <a href="#" class="font-medium text-primary-600 hover:underline dark:text-primary-500">Connectez vous</a>
-            </p>
+          <div>
+            <label for="email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Email</label>
+            <input v-model="sendingData.email" type="email" name="email" id="email" class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="email@name.fr" required="">
+          </div>
+          <div>
+            <label for="password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Mot de passe</label>
+            <input v-model="sendingData.password" type="password" name="password" id="password" placeholder="••••••••" class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required="">
+          </div>
+          <div>
+            <label for="confirm-password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Confirmez votre mot de passe</label>
+            <input v-model="sendingData.passwordConfirm" type="password" name="confirm-password" id="confirm-password" placeholder="••••••••" class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required="">
+          </div>
+          <button class="w-full text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800" @click="submit()">Envoyer</button>
+          <p class="text-sm font-light text-gray-500 dark:text-gray-400">
+            Déjà un compte ? <a href="#" class="font-medium text-primary-600 hover:underline dark:text-primary-500">Connectez vous</a>
+          </p>
         </div>
       </div>
     </div>
   </section>
 </template>
 
-<script>
-export default {
-  methods: {
-    async submit() {
-      this.$toast.show({
-    type: 'success',
-    title: 'Success',
-    message: 'This is a successful toast',
-  })
-    await fetch('http://localhost:8000/register', {
-      method: 'POST',
-        body: {
-          email: "toto",
-          password: "toto"
-        }
-      })
+<script setup>
+const config = useRuntimeConfig()
+const router = useRouter()
+const sendingData = {
+  email: '',
+  password: '',
+  passwordConfirm: ''
+}
+/**
+ * Function who send GraphQL request to back to connect user
+ */
+async function submit() {
+  await useFetch(config.public.URL_BACK + 'api/users/register', {
+    method: 'POST',
+    body: {
+      "email": sendingData.email,
+      "password": sendingData.password,
+      "passwordConfirm": sendingData.passwordConfirm
     }
-  }
+  }).then((response) => {
+    console.log(response.json());
+    if(response.data.value.token){
+      localStorage.setItem('token', response.data.value.token)
+      router.push('/')
+    }
+  })
+
+//   const query = gql`
+//   mutation signupUser($input: SignUpInput!) {
+//     signupUser(input: $input) {
+//         status
+//         user {
+//           id
+//           email
+//         }
+//     }
+// }
+// `
+//   const variables = {
+//     "input": {
+//       "email": sendingData.email,
+//       "password": sendingData.password,
+//       "passwordConfirm": sendingData.passwordConfirm
+//     }
+//   }
+//   const { data } = await useAsyncQuery(query, variables)
+//   console.log(data);
+  // if (data.value.loginUser) {
+  //   // if (data.value.loginUser.status == "success") {
+  //   //   localStorage.setItem('token', data.value.loginUser.access_token)
+  //   //   router.push('/')
+  //   // } else {
+  //   //   console.log(data.value);
+  //   // }
+  // }
 }
 definePageMeta({
   layout: "nonavbar",

@@ -17,7 +17,8 @@ export const SECRET_KEY: Secret = 'your-secret-key-here';
  */
 export async function register(req: Request, res: Response) {
     //Check if passwords are equal
-    if (req.body.password != req.body.confirmpassword) {
+    
+    if (req.body.password != req.body.passwordConfirm) {
         res.status(500).send('Password not equal to confirm password')
     } else {
         //Check unique email and create
@@ -25,8 +26,12 @@ export async function register(req: Request, res: Response) {
         await Merchant.create({
             email: req.body.email,
             password: req.body.password
-        }).then(() => {
-            res.status(201).send("Registered");
+        }).then((data) => {
+            console.log(data);
+            const token = jwt.sign({ _id: data._id?.toString(), name: data.name }, SECRET_KEY, {
+                expiresIn: '2 days',
+            });
+            res.status(201).send({ user: { _id: data._id, email: data.email }, token: token });
         })
             .catch(error => {
                 let msg = "Error";
@@ -36,8 +41,57 @@ export async function register(req: Request, res: Response) {
                 // Will error, but will *not* be a mongoose validation error, it will be
                 // a duplicate key error.
                 // See: https://masteringjs.io/tutorials/mongoose/e11000-duplicate-key
-                res.send(getErrorMessage(error));
+                res.send({
+                    error: getErrorMessage(error),
+                    error_message: msg
+                });
             });
+    }
+}
+
+export async function registerGraphQL(parent, args, { req: Request, res: Response }) {
+    console.log('test');
+    //Check if passwords are equal
+    if (args.input.password != args.input.passwordConfirm) {
+        console.log(args);
+        return 'Password not equal to confirm password'
+    } else {
+        //Check unique email and create
+        await Merchant.init()
+        await Merchant.create({
+            email: args.input.email,
+            password: args.input.password
+        }).then((data) => {
+            console.log({
+                status: 'success',
+                user : {
+                    id: data._id.toString(),
+                    email: data.email
+                }
+            });
+            
+            return {
+                status: 'success',
+                user : {
+                    id: data._id.toString(),
+                    email: data.email
+                }
+            }
+        })
+            .catch(error => {
+                let msg = "Error";
+                if (error.code == 11000) {
+                    msg = "Account already exist in database with this email"
+                }
+                // Will error, but will *not* be a mongoose validation error, it will be
+                // a duplicate key error.
+                // See: https://masteringjs.io/tutorials/mongoose/e11000-duplicate-key
+                return {
+                    message: getErrorMessage(error)
+                }
+            });
+            console.log("pase ici ?");
+            
     }
 }
 

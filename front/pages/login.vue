@@ -25,6 +25,7 @@
   </section>
 </template>
 <script setup>
+const config = useRuntimeConfig();
 const router = useRouter()
 const sendingData = {
   email: '',
@@ -34,30 +35,43 @@ const sendingData = {
  * Function who send GraphQL request to back to connect user
  */
 async function submit() {
-  const query = gql`
-  mutation loginUser($input: LoginInput!) {
-    loginUser(input: $input) {
-        access_token,
-        status
-    }
-}
-`
-  const variables = {
-    "input": {
+  await useFetch(config.public.URL_BACK + 'api/users/login', {
+    method: 'POST',
+    body: {
       "email": sendingData.email,
       "password": sendingData.password
     }
-  }
-  const { data } = await useAsyncQuery(query, variables)
-  if(data.value.loginUser){
-    console.log(this);
-    if(data.value.loginUser.status == "success"){
-      localStorage.setItem('token', data.value.loginUser.access_token)
+  }).then((response) => {
+    if(response.data.token){
+      localStorage.setItem('token', response.data.token)
       router.push('/')
-    } else {
-      console.log(data.value);
     }
-  }
+  })
+
+  //   const query = gql`
+  //   mutation loginUser($input: LoginInput!) {
+  //     loginUser(input: $input) {
+  //         access_token,
+  //         status
+  //     }
+  // }
+  // `
+  //   const variables = {
+  //     "input": {
+  //       "email": sendingData.email,
+  //       "password": sendingData.password
+  //     }
+  //   }
+  //   const { data } = await useAsyncQuery(query, variables)
+  //   if(data.value.loginUser){
+  //     console.log(this);
+  //     if(data.value.loginUser.status == "success"){
+  //       localStorage.setItem('token', data.value.loginUser.access_token)
+  //       router.push('/')
+  //     } else {
+  //       console.log(data.value);
+  //     }
+  //   }
 }
 definePageMeta({
   layout: "nonavbar",

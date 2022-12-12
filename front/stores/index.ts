@@ -3,11 +3,21 @@ import { acceptHMRUpdate, defineStore } from 'pinia'
 const delay = (t: number) => new Promise((r) => setTimeout(r, t))
 
 export const useIndex = defineStore('index', {
-  state: () => ({}),
+  state: () => ({
+    token: null as String|null
+  }),
 
   getters: {
-    isLogged: state => localStorage.getItem('token') ? true : false
+    isLogged: state => state.token ? true : false
   },
+  actions: {
+    setToken(token: string|null){
+      this.token = token
+    },
+    signOut(){
+      this.token = null
+    }
+  }
 })
 
 if (import.meta.hot) {
