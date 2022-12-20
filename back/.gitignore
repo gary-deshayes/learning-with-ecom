@@ -1,1 +1,3 @@
 node_modules
+/dist/uploads/profile_pics/*
+/uploads/profile_pics/*

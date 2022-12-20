@@ -35,18 +35,31 @@ const sendingData = {
  * Function who send GraphQL request to back to connect user
  */
 async function submit() {
-  await useFetch(config.public.URL_BACK + 'api/users/login', {
+  const {data: data} = await useFetch(config.public.URL_BACK + 'api/users/login', {
     method: 'POST',
     body: {
       "email": sendingData.email,
       "password": sendingData.password
     }
-  }).then((response) => {
-    if(response.data.token){
-      localStorage.setItem('token', response.data.token)
+  })
+  if(data.value.token){
+      localStorage.setItem('token', data.value.token)
       router.push('/')
     }
-  })
+  // await useFetch(config.public.URL_BACK + 'api/users/login', {
+  //   method: 'POST',
+  //   body: {
+  //     "email": sendingData.email,
+  //     "password": sendingData.password
+  //   }
+  // }).then((response) => {
+  //   console.log(response.data.token);
+  //   if(response.data.token){
+  //     console.log(response.data.token);
+  //     localStorage.setItem('token', response.data.token)
+  //     router.push('/')
+  //   }
+  // })
 
   //   const query = gql`
   //   mutation loginUser($input: LoginInput!) {

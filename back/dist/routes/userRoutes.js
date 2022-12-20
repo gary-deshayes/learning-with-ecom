@@ -26,10 +26,15 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.userRoutes = void 0;
 const express_1 = require("express");
 exports.userRoutes = (0, express_1.Router)();
-// import { CustomRequest } from '../middleware/auth';
+const authJwt_1 = require("../middleware/authJwt");
 const userService = __importStar(require("../services/userService"));
+const multerProfilPics_1 = require("../utils/multerProfilPics");
 exports.userRoutes.post('/login', userService.login);
 /**
  * Route for creationg merchant
  */
 exports.userRoutes.post('/register', userService.register);
+exports.userRoutes.get('/me', authJwt_1.auth, userService.me);
+exports.userRoutes.post('/me', authJwt_1.auth, userService.saveMe);
+exports.userRoutes.get('/photo/:id', userService.profilPics);
+exports.userRoutes.post('/photo', authJwt_1.auth, multerProfilPics_1.uploadProfilPics.single('avatar'), userService.profil);

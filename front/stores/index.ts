@@ -1,14 +1,17 @@
 import { acceptHMRUpdate, defineStore } from 'pinia'
-
-const delay = (t: number) => new Promise((r) => setTimeout(r, t))
+import Merchant from '~~/models/Merchants'
 
 export const useIndex = defineStore('index', {
   state: () => ({
-    token: null as String|null
+    token: null as String|null,
+    merchants: [] as Array<Merchant>
+
   }),
 
   getters: {
-    isLogged: state => state.token ? true : false
+    isLogged: state => state.token ? true : false,
+    getToken: state => state.token || localStorage.getItem('token'),
+    getMerchants : state => state.merchants
   },
   actions: {
     setToken(token: string|null){
@@ -16,6 +19,11 @@ export const useIndex = defineStore('index', {
     },
     signOut(){
       this.token = null
+    },
+    setMerchants(merchants: Array<Merchant>){
+      console.log(merchants);
+      
+      this.merchants = merchants
     }
   }
 })

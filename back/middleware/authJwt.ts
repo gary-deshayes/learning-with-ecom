@@ -1,25 +1,28 @@
 import jwt, { Secret, JwtPayload } from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
-
-export const SECRET_KEY: Secret = 'your-secret-key-here';
+import { Merchant } from '../models/Merchant';
 
 export interface CustomRequest extends Request {
- token: string | JwtPayload;
+  token: string | JwtPayload;
 }
 
 export const auth = async (req: Request, res: Response, next: NextFunction) => {
- try {
-   const token = req.header('Authorization')?.replace('Bearer ', '');
-
-   if (!token) {
-     throw new Error();
-   }
-
-   const decoded = jwt.verify(token, SECRET_KEY);
-   (req as CustomRequest).token = decoded;
-
-   next();
- } catch (err) {
-   res.status(401).send('Please authenticate');
- }
+  try {
+    const token = req.header('Authorization')?.replace('Bearer ', '');
+    if (!token) {
+      throw new Error('Token are not valid');
+    }
+    const decoded = jwt.verify(token, process.env.jwt_secret as Secret);
+    (req as CustomRequest).token = decoded;
+    const user = await Merchant.findOne({ _id: decoded._id })
+    if (!user) {
+      throw new Error('User dont exist')
+    }
+    (req as CustomRequest).user = user;
+    next();
+  } catch (err) {
+    console.log(err);
+    
+    res.status(401).send('Please authenticate');
+  }
 };

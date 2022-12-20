@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.loginGraph = exports.login = exports.registerGraphQL = exports.register = exports.SECRET_KEY = void 0;
+exports.loginGraph = exports.login = exports.registerGraphQL = exports.register = exports.me = exports.saveMe = exports.profil = exports.profilPics = void 0;
 /**
  * Service who contains all fonction for creating and manage merchant
  */
@@ -21,7 +21,48 @@ const Merchant_1 = require("../models/Merchant");
 const errors_util_1 = require("../utils/errors.util");
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-exports.SECRET_KEY = 'your-secret-key-here';
+const path_1 = __importDefault(require("path"));
+const fs_1 = __importDefault(require("fs"));
+function profilPics(req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let pathImg = path_1.default.join(__dirname, '../uploads/profile_pics/' + req.params.id + '.jpg');
+        if (fs_1.default.existsSync(pathImg)) {
+            res.sendFile(pathImg);
+        }
+        else {
+            res.sendFile(path_1.default.join(__dirname, '../assets/market.png'));
+        }
+    });
+}
+exports.profilPics = profilPics;
+function profil(req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        console.log(req.body);
+        res.send('photo uploadée');
+    });
+}
+exports.profil = profil;
+function saveMe(req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (req.body.password.password != req.body.password.passwordConfirm) {
+            res.status(500).send('Password not equal to confirm password');
+        }
+        req.user.password = req.body.password.password;
+        req.user.email = req.body.user.email;
+        req.user.description = req.body.user.description;
+        req.user.address = req.body.user.address;
+        req.user.save().then((savedUser) => {
+            return res.send(savedUser);
+        });
+    });
+}
+exports.saveMe = saveMe;
+function me(req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        return res.send(req.user);
+    });
+}
+exports.me = me;
 /**
  * Function who allow to add merchant
  * @param req
@@ -42,8 +83,8 @@ function register(req, res) {
             }).then((data) => {
                 var _a;
                 console.log(data);
-                const token = jsonwebtoken_1.default.sign({ _id: (_a = data._id) === null || _a === void 0 ? void 0 : _a.toString(), name: data.name }, exports.SECRET_KEY, {
-                    expiresIn: '2 days',
+                const token = jsonwebtoken_1.default.sign({ _id: (_a = data._id) === null || _a === void 0 ? void 0 : _a.toString(), name: data.name }, process.env.jwt_secret, {
+                    expiresIn: '2 days'
                 });
                 res.status(201).send({ user: { _id: data._id, email: data.email }, token: token });
             })
@@ -122,7 +163,7 @@ function login(req, res) {
             }
             const isMatch = bcrypt_1.default.compareSync(req.body.password, foundUser.password);
             if (isMatch) {
-                const token = jsonwebtoken_1.default.sign({ _id: (_a = foundUser._id) === null || _a === void 0 ? void 0 : _a.toString(), name: foundUser.name }, exports.SECRET_KEY, {
+                const token = jsonwebtoken_1.default.sign({ _id: (_a = foundUser._id) === null || _a === void 0 ? void 0 : _a.toString(), name: foundUser.name }, process.env.jwt_secret, {
                     expiresIn: '2 days',
                 });
                 res.send({ user: { _id: foundUser._id, email: foundUser.email }, token: token });
@@ -147,7 +188,7 @@ function loginGraph(parent, args, { req: Request, res: Response }) {
             }
             const isMatch = bcrypt_1.default.compareSync(args.input.password, foundUser.password);
             if (isMatch) {
-                const token = jsonwebtoken_1.default.sign({ _id: (_a = foundUser._id) === null || _a === void 0 ? void 0 : _a.toString(), name: foundUser.name }, exports.SECRET_KEY, {
+                const token = jsonwebtoken_1.default.sign({ _id: (_a = foundUser._id) === null || _a === void 0 ? void 0 : _a.toString(), name: foundUser.name }, process.env.jwt_secret, {
                     expiresIn: '2 days',
                 });
                 return {

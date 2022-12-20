@@ -8,8 +8,41 @@ import { Request, Response } from 'express';
 import { getErrorMessage } from '../utils/errors.util';
 import bcrypt from 'bcrypt';
 import jwt, { Secret, JwtPayload } from 'jsonwebtoken';
+import path from 'path'
+import fs from 'fs'
 
-export const SECRET_KEY: Secret = 'your-secret-key-here';
+export async function profilPics(req: Request, res: Response) {
+    let pathImg = path.join(__dirname, '../uploads/profile_pics/' + req.params.id + '.jpg')
+    if(fs.existsSync(pathImg)){
+        res.sendFile(pathImg)
+    } else {
+        res.sendFile(path.join(__dirname, '../assets/market.png'))
+    }
+}
+
+export async function profil(req: Request, res: Response) {
+    console.log(req.body);
+
+    res.send('photo uploadée')
+}
+
+export async function saveMe(req: Request, res: Response) {
+    if (req.body.password.password != req.body.password.passwordConfirm) {
+        res.status(500).send('Password not equal to confirm password')
+    }
+    req.user.password = req.body.password.password
+    req.user.email = req.body.user.email
+    req.user.description = req.body.user.description
+    req.user.address = req.body.user.address
+    req.user.save().then((savedUser) => {
+        return res.send(savedUser)
+    })
+
+
+}
+export async function me(req: Request, res: Response) {
+    return res.send(req.user)
+}
 /**
  * Function who allow to add merchant
  * @param req 
@@ -17,7 +50,7 @@ export const SECRET_KEY: Secret = 'your-secret-key-here';
  */
 export async function register(req: Request, res: Response) {
     //Check if passwords are equal
-    
+
     if (req.body.password != req.body.passwordConfirm) {
         res.status(500).send('Password not equal to confirm password')
     } else {
@@ -28,8 +61,8 @@ export async function register(req: Request, res: Response) {
             password: req.body.password
         }).then((data) => {
             console.log(data);
-            const token = jwt.sign({ _id: data._id?.toString(), name: data.name }, SECRET_KEY, {
-                expiresIn: '2 days',
+            const token = jwt.sign({ _id: data._id?.toString(), name: data.name }, process.env.jwt_secret as Secret, {
+                expiresIn: '2 days'
             });
             res.status(201).send({ user: { _id: data._id, email: data.email }, token: token });
         })
@@ -64,15 +97,15 @@ export async function registerGraphQL(parent, args, { req: Request, res: Respons
         }).then((data) => {
             console.log({
                 status: 'success',
-                user : {
+                user: {
                     id: data._id.toString(),
                     email: data.email
                 }
             });
-            
+
             return {
                 status: 'success',
-                user : {
+                user: {
                     id: data._id.toString(),
                     email: data.email
                 }
@@ -90,8 +123,8 @@ export async function registerGraphQL(parent, args, { req: Request, res: Respons
                     message: getErrorMessage(error)
                 }
             });
-            console.log("pase ici ?");
-            
+        console.log("pase ici ?");
+
     }
 }
 
@@ -108,7 +141,7 @@ export async function login(req: Request, res: Response) {
         const isMatch = bcrypt.compareSync(req.body.password, foundUser.password);
 
         if (isMatch) {
-            const token = jwt.sign({ _id: foundUser._id?.toString(), name: foundUser.name }, SECRET_KEY, {
+            const token = jwt.sign({ _id: foundUser._id?.toString(), name: foundUser.name }, process.env.jwt_secret as Secret, {
                 expiresIn: '2 days',
             });
 
@@ -131,7 +164,7 @@ export async function loginGraph(parent, args, { req: Request, res: Response }) 
         const isMatch = bcrypt.compareSync(args.input.password, foundUser.password);
 
         if (isMatch) {
-            const token = jwt.sign({ _id: foundUser._id?.toString(), name: foundUser.name }, SECRET_KEY, {
+            const token = jwt.sign({ _id: foundUser._id?.toString(), name: foundUser.name }, process.env.jwt_secret as Secret, {
                 expiresIn: '2 days',
             });
 
@@ -143,7 +176,7 @@ export async function loginGraph(parent, args, { req: Request, res: Response }) 
             throw new Error('Password is not correct');
         }
     } catch (error) {
-        return  {
+        return {
             status: error,
             access_token: ""
         }

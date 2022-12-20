@@ -22,6 +22,8 @@ exports.MerchantSchema = new mongoose_1.Schema({
     password: { type: String, required: true },
     ownerFirstName: { type: String, required: false },
     ownerLastName: { type: String, required: false },
+    description: { type: String, required: false },
+    address: { type: String, required: false },
 });
 //Before saving, hash the password
 exports.MerchantSchema.pre('save', function (next) {

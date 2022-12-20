@@ -7,6 +7,8 @@ export interface IMerchant extends Document {
   password: string;
   ownerFirstName: string;
   ownerLastName: string;
+  description: string;
+  address: string;
 }
 
 export const MerchantSchema: Schema<IMerchant> = new Schema({
@@ -15,6 +17,8 @@ export const MerchantSchema: Schema<IMerchant> = new Schema({
   password: { type: String, required: true },
   ownerFirstName: { type: String, required: false },
   ownerLastName: { type: String, required: false },
+  description: { type: String, required: false },
+  address: { type: String, required: false },
 });
 
 //Before saving, hash the password
